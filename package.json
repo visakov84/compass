@@ -37,7 +37,9 @@
     "type": "git",
     "url": "git://github.com/mongodb-js/compass.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "eslint": "^7.29.0"
+  },
   "devDependencies": {
     "cross-env": "^7.0.3",
     "find-up": "^5.0.0",
