@@ -6,7 +6,7 @@ The MongoDB GUI.
 # Development
 Running Compass locally requires Node.js and npm:
 
-- `Node.js`: ^14.17.3
+- `Node.js`: ^12.9.0
 - `npm`: >=7.16.0
 
 ```shell
