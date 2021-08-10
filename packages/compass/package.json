@@ -217,12 +217,12 @@
   },
   "scripts": {
     "install": "node scripts/download-akzidenz.js",
-    "electron-rebuild": "electron-rebuild --force --only kerberos,keytar,interruptor",
+    "electron-rebuild": "electron-rebuild --force --only interruptor",
     "prestart": "rm -rf .compiled-sources && rm -rf package-lock.json && npm run electron-rebuild",
     "start": "hadron-build develop",
     "pretest": "npm run electron-rebuild",
     "test": "hadron-build test",
-    "posttest": "node ../../scripts/killall-mongo.js && node ../../scripts/rebuild.js kerberos interruptor",
+    "posttest": "node ../../scripts/killall-mongo.js && node ../../scripts/rebuild.js interruptor",
     "check": "npm run lint && npm run depcheck",
     "clean": "hadron-build clean",
     "compile-ui": "hadron-build ui",
@@ -243,7 +243,7 @@
     "depcheck": "depcheck",
     "pretest-ci": "npm run electron-rebuild",
     "test-ci": "npm run test-release-tasks && xvfb-maybe electron-mocha --no-sandbox ./test/**/*.test.js",
-    "posttest-ci": "node ../../scripts/killall-mongo.js && node ../../scripts/rebuild.js kerberos interruptor"
+    "posttest-ci": "node ../../scripts/killall-mongo.js && node ../../scripts/rebuild.js interruptor"
   },
   "repository": {
     "type": "git",
