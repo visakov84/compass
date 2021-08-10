@@ -19,9 +19,7 @@
   "scripts": {
     "check": "npm run lint && npm run depcheck",
     "test": "mocha && npm run test:electron",
-    "pretest:electron": "electron-rebuild keytar",
     "test:electron": "xvfb-maybe electron-mocha --no-sandbox --renderer",
-    "posttest:electron": "node ../../scripts/rebuild.js keytar",
     "lint": "eslint \"./{src,lib,test,bin}/**/*.{js,jsx,ts,tsx}\" \"./*.js\" --no-error-on-unmatched-pattern",
     "depcheck": "depcheck",
     "test-ci": "npm run test"
@@ -40,7 +38,7 @@
   },
   "devDependencies": {
     "depcheck": "^1.4.1",
-    "electron": "^6.1.12",
+    "electron": "^13.1.8",
     "electron-mocha": "^8.2.0",
     "electron-rebuild": "^2.3.5",
     "eslint": "^7.25.0",
