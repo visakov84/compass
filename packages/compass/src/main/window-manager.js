@@ -149,7 +149,9 @@ var createWindow = (module.exports.create = function(opts) {
     webPreferences: {
       'subpixel-font-scaling': true,
       'direct-write': true,
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
     }
   });
 
@@ -170,7 +172,9 @@ var createWindow = (module.exports.create = function(opts) {
     webPreferences: {
       'subpixel-font-scaling': true,
       'direct-write': true,
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
     }
   });
 
