@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import cloneDeep from 'lodash.clonedeep';
 import ReactTooltip from 'react-tooltip';
 import { AutoSizer, List } from 'react-virtualized';
+import IconButton from '@leafygreen-ui/icon-button';
+import Icon from '@leafygreen-ui/icon';
 import { globalAppRegistryEmit } from '@mongodb-js/mongodb-redux-common/app-registry';
 
 import classnames from 'classnames';
@@ -12,13 +14,17 @@ import styles from './sidebar.less';
 import SidebarTitle from '../sidebar-title';
 import SidebarInstance from '../sidebar-instance';
 import SidebarDatabase from '../sidebar-database';
+import SidebarSearch from '../sidebar-search';
 import NonGenuineWarningModal from '../non-genuine-warning-modal';
 
 import { toggleIsCollapsed } from '../../modules/is-collapsed';
 import { toggleIsDetailsExpanded } from '../../modules/is-details-expanded';
 import { toggleIsGenuineMongoDBVisible } from '../../modules/is-genuine-mongodb-visible';
-import { filterDatabases, changeDatabases } from '../../modules/databases';
-import { changeFilterRegex } from '../../modules/filter-regex';
+import {
+  changeActiveNamespace,
+  changeDatabases,
+  NO_ACTIVE_NAMESPACE
+} from '../../modules/databases';
 import { openLink } from '../../modules/link';
 import { toggleIsModalVisible } from '../../modules/is-modal-visible';
 import { saveFavorite, deleteFavorite } from '../../modules/connection-model';
@@ -32,9 +38,9 @@ const EXPANDED_WHITESPACE = 12;
 class Sidebar extends PureComponent {
   static displayName = 'Sidebar';
   static propTypes = {
+    changeActiveNamespace: PropTypes.func.isRequired,
     databases: PropTypes.object.isRequired,
     description: PropTypes.string.isRequired,
-    filterRegex: PropTypes.any.isRequired,
     instance: PropTypes.object.isRequired,
     isCollapsed: PropTypes.bool.isRequired,
     isDetailsExpanded: PropTypes.bool.isRequired,
@@ -43,10 +49,8 @@ class Sidebar extends PureComponent {
     toggleIsCollapsed: PropTypes.func.isRequired,
     toggleIsDetailsExpanded: PropTypes.func.isRequired,
     detailsPlugins: PropTypes.array.isRequired,
-    filterDatabases: PropTypes.func.isRequired,
     changeDatabases: PropTypes.func.isRequired,
     openLink: PropTypes.func.isRequired,
-    changeFilterRegex: PropTypes.func.isRequired,
     isDataLake: PropTypes.bool.isRequired,
     isGenuineMongoDB: PropTypes.bool.isRequired,
     isGenuineMongoDBVisible: PropTypes.bool.isRequired,
@@ -69,38 +73,20 @@ class Sidebar extends PureComponent {
     ReactTooltip.rebuild();
   }
 
-  handleCollapse() {
+  onClickDatabasesTitle() {
+    this.props.globalAppRegistryEmit('select-instance');
+
+    require('hadron-ipc').call('window:hide-collection-submenu');
+
+    this.props.changeActiveNamespace(NO_ACTIVE_NAMESPACE);
+  }
+
+  onToggleCollapse() {
     if (!this.props.isCollapsed) {
       this.props.onCollapse();
-      this.props.globalAppRegistryEmit('compass:status:configure', { sidebar: false });
+      this.props.globalAppRegistryEmit('compass:status:configure', { sidebar: !this.props.isCollapsed });
       this.props.toggleIsCollapsed(!this.props.isCollapsed);
     }
-  }
-
-  handleExpand() {
-    if (this.props.isCollapsed) {
-      this.props.onCollapse();
-      this.props.globalAppRegistryEmit('compass:status:configure', { sidebar: true });
-      this.props.toggleIsCollapsed(!this.props.isCollapsed);
-    }
-  }
-
-  handleSearchFocus() {
-    this.refs.filter.focus();
-  }
-
-  handleFilter(event) {
-    const searchString = event.target.value;
-
-    let re;
-    try {
-      re = new RegExp(searchString, 'i');
-    } catch (e) {
-      re = /(?:)/;
-    }
-
-    this.props.changeFilterRegex(re);
-    this.props.filterDatabases(re, null, null);
   }
 
   handleCreateDatabaseClick(isWritable) {
@@ -232,42 +218,65 @@ class Sidebar extends PureComponent {
     return (
       <div
         className={classnames(styles['compass-sidebar'], styles[collapsed])}
-        onClick={this.handleExpand.bind(this)}>
+      >
         <button
           className={classnames(styles['compass-sidebar-toggle'], 'btn btn-default btn-sm')}
-          onClick={this.handleCollapse.bind(this)}
-          data-test-id="toggle-sidebar">
-          <i className={collapsedButton}/>
+          onClick={this.onToggleCollapse.bind(this)}
+          data-test-id="toggle-sidebar"
+        >
+          <i className={collapsedButton} />
         </button>
         <SidebarTitle
           connectionModel={this.props.connectionModel}
-          isSidebarCollapsed={this.props.isCollapsed}
-          globalAppRegistryEmit={this.props.globalAppRegistryEmit} />
-        <SidebarInstance
-          instance={this.props.instance}
-          isExpanded={this.props.isDetailsExpanded}
-          isSidebarCollapsed={this.props.isCollapsed}
-          detailsPlugins={this.props.detailsPlugins}
-          isGenuineMongoDB={this.props.isGenuineMongoDB}
-          toggleIsDetailsExpanded={this.props.toggleIsDetailsExpanded}
+          deleteFavorite={this.props.deleteFavorite}
           globalAppRegistryEmit={this.props.globalAppRegistryEmit}
-          connectionModel={this.props.connectionModel}
-          toggleIsModalVisible={this.props.toggleIsModalVisible}
           isModalVisible={this.props.isModalVisible}
+          isSidebarCollapsed={this.props.isCollapsed}
           saveFavorite={this.props.saveFavorite}
-          deleteFavorite={this.props.deleteFavorite} />
-        <div
-          className={classnames(styles['compass-sidebar-filter'])}
-          onClick={this.handleSearchFocus.bind(this)}>
-          <i className={classnames('fa', 'fa-search', styles['compass-sidebar-search-icon'])}/>
-          <input
-            data-test-id="sidebar-filter-input"
-            ref="filter"
-            className={classnames(styles['compass-sidebar-search-input'])}
-            placeholder="Filter your data"
-            onChange={this.handleFilter.bind(this)} />
-        </div>
-        <div className={classnames(styles['compass-sidebar-content'])}>
+          toggleIsModalVisible={this.props.toggleIsModalVisible}
+        />
+        {this.props.isCollapsed && (
+          <IconButton
+            className={styles['compass-sidebar-databases-button']}
+            title="Databases"
+            aria-label="View Databases"
+            onClick={this.onClickDatabasesTitle.bind(this)}
+            darkMode
+            size="large"
+          >
+            <Icon
+              glyph="Database"
+              darkMode
+            />
+          </IconButton>
+        )}
+        {!this.props.isCollapsed && (
+          <>
+            <SidebarInstance
+              instance={this.props.instance}
+              isExpanded={this.props.isDetailsExpanded}
+              isSidebarCollapsed={this.props.isCollapsed}
+              detailsPlugins={this.props.detailsPlugins}
+              isGenuineMongoDB={this.props.isGenuineMongoDB}
+              toggleIsDetailsExpanded={this.props.toggleIsDetailsExpanded}
+              globalAppRegistryEmit={this.props.globalAppRegistryEmit}
+            />
+            <a
+              className={styles['compass-sidebar-databases-title']}
+              href="#"
+              onClick={this.onClickDatabasesTitle.bind(this)}
+            >
+              <Icon
+                glyph="Database"
+                // size="small"
+                darkMode
+              />
+              Databases
+            </a>
+            <SidebarSearch />
+          </>
+        )}
+        <div className={styles['compass-sidebar-content']}>
           {this.renderSidebarScroll()}
         </div>
         <NonGenuineWarningModal
@@ -296,7 +305,6 @@ const mapStateToProps = (state, ownProps) => ({
   databases: state.databases,
   description: state.description,
   detailsPlugins: state.detailsPlugins,
-  filterRegex: state.filterRegex,
   instance: state.instance,
   isCollapsed: state.isCollapsed,
   isDblistExpanded: state.isDblistExpanded,
@@ -317,12 +325,11 @@ const mapStateToProps = (state, ownProps) => ({
 const MappedSidebar = connect(
   mapStateToProps,
   {
+    changeActiveNamespace,
     toggleIsCollapsed,
     toggleIsDetailsExpanded,
     toggleIsGenuineMongoDBVisible,
-    filterDatabases,
     changeDatabases,
-    changeFilterRegex,
     openLink,
     globalAppRegistryEmit,
     toggleIsModalVisible,

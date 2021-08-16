@@ -137,6 +137,9 @@
   },
   "dependencies": {
     "@leafygreen-ui/icon": "^11.4.0",
+    "@leafygreen-ui/icon-button": "^9.1.5",
+    "@leafygreen-ui/logo": "^5.0.0",
+    "@leafygreen-ui/text-input": "^6.0.3",
     "@mongodb-js/mongodb-redux-common": "^1.4.0",
     "lodash.clonedeep": "^4.5.0"
   },

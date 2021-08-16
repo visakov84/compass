@@ -1,32 +1,30 @@
 @import (reference) "~less/compass/_theme.less";
 
 @compass-sidebar-title-background-color: @gray1;
-@compass-sidebar-title-background-color: lighten(hsl(204, 29%, 18%), 5%);
-@compass-sidebar-hover-background-color: @gray1;
-@compass-sidebar-hover-background-color: lighten(hsl(204, 29%, 18%), 5%);
-@compass-sidebar-active-background-color: @gray4;
-@compass-sidebar-active-background-color: lighten(hsl(201, 11%, 41%), 10%);
+
+.sidebar-title-logo {
+  background-color: @compass-sidebar-title-background-color;
+  padding: 12px 0px;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
+
+  svg {
+    margin: 0 auto;
+  }
+}
 
 .sidebar-title {
   background-color: @compass-sidebar-title-background-color;
 
-  padding: 7px 10px 7px 10px;
+  padding: 2px 14px;
   border-bottom: 1px solid @gray2;
-  cursor: pointer;
 
-  &:hover {
-    background: @compass-sidebar-hover-background-color;
-    color: @pw;
-  }
-
-  &-is-active {
-    color: @pw;
-    background: @compass-sidebar-active-background-color;
-    &:hover {
-      color: @pw;
-      background: @compass-sidebar-active-background-color;
-    }
-  }
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
 
   &-name {
     color: @pw;
@@ -34,9 +32,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-right: 4px;
 
     &-icon {
       font-size: 16px;
     }
+  }
+
+  &-connection-color {
+    width: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
   }
 }

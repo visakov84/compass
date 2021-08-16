@@ -28,7 +28,8 @@ describe('Error Resource', function() {
 
   it('should be usable from the metrics module directly', function(done) {
     errorResource.error = function(err, metadata) {
-      debug('arguments', arguments);
+      const args = [...arguments];
+      debug('arguments', args);
       assert.equal(err.message, 'foo bar');
       assert.equal(metadata.meta, 'data');
       done();

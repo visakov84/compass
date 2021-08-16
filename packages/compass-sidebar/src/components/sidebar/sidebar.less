@@ -39,6 +39,34 @@
     }
   }
 
+  &-databases-button {
+    margin: 10px auto;
+  }
+
+  &-databases-title {
+    text-transform: uppercase;
+    padding: 10px;
+    color: @pw;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+
+    svg {
+      margin-right: 8px;
+    }
+
+    &:hover {
+      color: darken(@pw, 5%);
+      text-decoration: none;
+    }
+    &:active {
+      color: darken(@pw, 7%);
+    }
+    &:focus {
+      color: darken(@pw, 7%);
+    }
+  }
+
   &-expanded {
     flex-basis: 250px;
   }
@@ -91,6 +119,7 @@
   &-content {
     flex: 1;
     overflow: hidden;
+    margin-top: 5px;
   }
 
   *::-webkit-scrollbar-track {
@@ -167,7 +196,6 @@
 
 .compass-sidebar-collapsed {
   overflow: hidden;
-  cursor: pointer;
   flex-basis: 36px;
 
   .compass-sidebar-toggle {

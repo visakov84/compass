@@ -1,80 +1,109 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
-import FontAwesome from 'react-fontawesome';
-import { connect } from 'react-redux';
-
+import IconButton from '@leafygreen-ui/icon-button';
+import Icon from '@leafygreen-ui/icon';
+import { FavoriteModal } from '@mongodb-js/compass-connect';
 import {
-  NO_ACTIVE_NAMESPACE,
-  changeActiveNamespace
-} from '../../modules/databases';
+  LogoMark
+} from '@leafygreen-ui/logo';
+
 import styles from './sidebar-title.less';
 
-/**
- * The title row in the sidebar.
- */
-class SidebarTitle extends PureComponent {
-  static displayName = 'SidebarTitleComponent';
-  static propTypes = {
-    activeNamespace: PropTypes.string.isRequired,
-    changeActiveNamespace: PropTypes.func.isRequired,
-    connectionModel: PropTypes.object.isRequired,
-    globalAppRegistryEmit: PropTypes.func.isRequired,
-    isSidebarCollapsed: PropTypes.bool.isRequired
+function SidebarTitle({
+  connectionModel,
+  deleteFavorite,
+  globalAppRegistryEmit,
+  isModalVisible,
+  isSidebarCollapsed,
+  saveFavorite,
+  toggleIsModalVisible
+}) {
+  /**
+   * Deletes the current favorite.
+   *
+   * @param {Object} connection - The current connection.
+   */
+  const onDeleteFavorite = (connection) => {
+    deleteFavorite(connection);
+    toggleIsModalVisible(false);
+    globalAppRegistryEmit('clear-current-favorite');
   };
 
   /**
-   * Handles click on the name in the title.
-   */
-  clickName = () => {
-    this.props.globalAppRegistryEmit('select-instance');
-
-    require('hadron-ipc').call('window:hide-collection-submenu');
-
-    this.props.changeActiveNamespace(NO_ACTIVE_NAMESPACE);
-  }
-
-  renderTitle() {
-    if (this.props.isSidebarCollapsed) {
-      return (
-        <FontAwesome
-          name="home"
-          className={styles['sidebar-title-name-icon']}
-        />
-      );
-    }
-    return this.props.connectionModel.connection.name;
-  }
-
-  /**
-   * Renders the title component.
+   * Saves the current connection to favorites.
    *
-   * @returns {Component} The component.
+   * @param {String} name - The favorite name.
+   * @param {String} color - The favorite color.
    */
-  render() {
+  const onSaveFavorite = (name, color) => {
+    saveFavorite(connectionModel.connection, name, color);
+    toggleIsModalVisible(false);
+  };
+
+  const isFavorite = connectionModel.connection.isFavorite;
+
+  if (isSidebarCollapsed) {
     return (
       <div
-        className={classnames(styles['sidebar-title'], {
-          [styles['sidebar-title-is-active']]: this.props.activeNamespace === NO_ACTIVE_NAMESPACE
-        })}
-        onClick={this.clickName}
+        styles={isFavorite ? {
+          backgroundColor: connectionModel.connection.color || 'transparent'
+        } : {}}
+        className={styles['sidebar-title-logo']}
       >
-        <div className={styles['sidebar-title-name']}>
-          {this.renderTitle()}
-        </div>
+        <LogoMark
+          darkMode
+          knockout
+        />
       </div>
     );
   }
+
+  return (
+    <div className={styles['sidebar-title']}>
+      {isModalVisible && (
+        <FavoriteModal
+          connectionModel={connectionModel.connection}
+          deleteFavorite={onDeleteFavorite}
+          closeFavoriteModal={() => toggleIsModalVisible(false)}
+          saveFavorite={onSaveFavorite}
+        />
+      )}
+      {isFavorite && (
+        <div
+          className={styles['sidebar-title-connection-color']}
+          style={{
+            backgroundColor: connectionModel.connection.color || 'transparent'
+          }}
+        />
+      )}
+      <h5 className={styles['sidebar-title-name']}>
+        {connectionModel.connection.name}
+      </h5>
+      <IconButton
+        title="Edit Connection Name"
+        aria-label="Edit Connection Name"
+        onClick={() => toggleIsModalVisible(true)}
+        darkMode
+      >
+        <Icon
+          glyph="Edit"
+          size="small"
+        />
+      </IconButton>
+    </div>
+  );
 }
 
-const mapStateToProps = (state) => ({
-  activeNamespace: state.databases.activeNamespace
-});
+SidebarTitle.displayName = 'SidebarTitleComponent';
+SidebarTitle.propTypes = {
+  connectionModel: PropTypes.object.isRequired,
+  deleteFavorite: PropTypes.func.isRequired,
+  globalAppRegistryEmit: PropTypes.func.isRequired,
+  isModalVisible: PropTypes.bool.isRequired,
+  isSidebarCollapsed: PropTypes.bool.isRequired,
+  saveFavorite: PropTypes.func.isRequired,
+  toggleIsModalVisible: PropTypes.func.isRequired
+};
 
-export default connect(
-  mapStateToProps,
-  {
-    changeActiveNamespace
-  },
-)(SidebarTitle);
+export default SidebarTitle;
 export { SidebarTitle };
