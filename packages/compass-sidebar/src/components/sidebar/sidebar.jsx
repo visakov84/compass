@@ -5,6 +5,7 @@ import cloneDeep from 'lodash.clonedeep';
 import ReactTooltip from 'react-tooltip';
 import { AutoSizer, List } from 'react-virtualized';
 import { globalAppRegistryEmit } from '@mongodb-js/mongodb-redux-common/app-registry';
+import { Icon, TextInput } from '@mongodb-js/compass-components';
 
 import classnames from 'classnames';
 import styles from './sidebar.less';
@@ -17,7 +18,12 @@ import NonGenuineWarningModal from '../non-genuine-warning-modal';
 import { toggleIsCollapsed } from '../../modules/is-collapsed';
 import { toggleIsDetailsExpanded } from '../../modules/is-details-expanded';
 import { toggleIsGenuineMongoDBVisible } from '../../modules/is-genuine-mongodb-visible';
-import { filterDatabases, changeDatabases } from '../../modules/databases';
+import {
+  NO_ACTIVE_NAMESPACE,
+  changeActiveNamespace,
+  filterDatabases,
+  changeDatabases
+} from '../../modules/databases';
 import { changeFilterRegex } from '../../modules/filter-regex';
 import { openLink } from '../../modules/link';
 import { toggleIsModalVisible } from '../../modules/is-modal-visible';
@@ -32,6 +38,7 @@ const EXPANDED_WHITESPACE = 12;
 class Sidebar extends PureComponent {
   static displayName = 'Sidebar';
   static propTypes = {
+    changeActiveNamespace: PropTypes.func.isRequired,
     databases: PropTypes.object.isRequired,
     description: PropTypes.string.isRequired,
     filterRegex: PropTypes.any.isRequired,
@@ -66,6 +73,14 @@ class Sidebar extends PureComponent {
     // Re-render tooltips once data has been fetched from mongo/d/s in a
     // performant way for data.mongodb.parts (~1500 collections)
     ReactTooltip.rebuild();
+  }
+
+  onClickDatabases = () => {
+    this.props.globalAppRegistryEmit('select-instance');
+
+    require('hadron-ipc').call('window:hide-collection-submenu');
+
+    this.props.changeActiveNamespace(NO_ACTIVE_NAMESPACE);
   }
 
   handleCollapse() {
@@ -241,7 +256,8 @@ class Sidebar extends PureComponent {
         <SidebarTitle
           connectionModel={this.props.connectionModel}
           isSidebarCollapsed={this.props.isCollapsed}
-          globalAppRegistryEmit={this.props.globalAppRegistryEmit} />
+          globalAppRegistryEmit={this.props.globalAppRegistryEmit}
+        />
         <SidebarInstance
           instance={this.props.instance}
           isExpanded={this.props.isDetailsExpanded}
@@ -255,7 +271,26 @@ class Sidebar extends PureComponent {
           isModalVisible={this.props.isModalVisible}
           saveFavorite={this.props.saveFavorite}
         />
-        <div
+        <button
+          className={styles['compass-sidebar-databases-title-button']}
+          onClick={this.onClickDatabases}
+        >
+          <Icon
+            className={styles['compass-sidebar-databases-icon']}
+            glyph="Database"
+          />
+          &nbsp;DATABASES
+        </button>
+        <TextInput
+          className={styles['compass-sidebar-search-input']}
+          // aria-labelledby
+          // label=""
+          darkMode
+          placeholder="Filter your data"
+          onChange={this.handleFilter.bind(this)}
+        />
+
+        {/* <div
           className={classnames(styles['compass-sidebar-filter'])}
           onClick={this.handleSearchFocus.bind(this)}>
           <i className={classnames('fa', 'fa-search', styles['compass-sidebar-search-icon'])}/>
@@ -265,14 +300,15 @@ class Sidebar extends PureComponent {
             className={classnames(styles['compass-sidebar-search-input'])}
             placeholder="Filter your data"
             onChange={this.handleFilter.bind(this)} />
-        </div>
-        <div className={classnames(styles['compass-sidebar-content'])}>
+        </div> */}
+        <div className={styles['compass-sidebar-content']}>
           {this.renderSidebarScroll()}
         </div>
         <NonGenuineWarningModal
           isVisible={this.props.isGenuineMongoDBVisible}
           toggleIsVisible={this.props.toggleIsGenuineMongoDBVisible}
-          openLink={this.props.openLink} />
+          openLink={this.props.openLink}
+        />
         {this.renderCreateDatabaseButton()}
         <ReactTooltip id={TOOLTIP_IDS.CREATE_DATABASE_BUTTON} />
         <ReactTooltip id={TOOLTIP_IDS.CREATE_COLLECTION} />
@@ -316,6 +352,7 @@ const mapStateToProps = (state, ownProps) => ({
 const MappedSidebar = connect(
   mapStateToProps,
   {
+    changeActiveNamespace,
     toggleIsCollapsed,
     toggleIsDetailsExpanded,
     toggleIsGenuineMongoDBVisible,

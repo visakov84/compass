@@ -27,6 +27,7 @@
   "license": "SSPL",
   "peerDependencies": {
     "@leafygreen-ui/icon": "^11.4.0",
+    "@mongodb-js/compass-components": "*",
     "@mongodb-js/compass-connect": "*",
     "debug": "*",
     "prop-types": "^15.7.2",
@@ -48,6 +49,7 @@
     "@hot-loader/react-dom": "^16.9.0",
     "@leafygreen-ui/logo": "^5.0.0",
     "@mongodb-js/compass-app-stores": "^5.12.0",
+    "@mongodb-js/compass-components": "^0.4.0",
     "@mongodb-js/compass-connect": "^7.12.0",
     "@mongodb-js/compass-deployment-awareness": "^11.12.0",
     "@mongodb-js/compass-server-version": "^5.12.0",
