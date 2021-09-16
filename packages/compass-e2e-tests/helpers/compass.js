@@ -233,7 +233,7 @@ async function startCompass(
 
 /**
  * @param {string[]} logs The main process console logs
- * @returns {Promise<any[]>}
+ * @returns {Promise<{raw: Buffer, structured: any[]}>}
  */
 async function getCompassLog(logs) {
   const logOutputIndicatorMatch = logs
@@ -241,7 +241,10 @@ async function getCompassLog(logs) {
     .find((match) => match);
   if (!logOutputIndicatorMatch) {
     debug('no log output indicator found!');
-    return [];
+    return {
+      raw: null,
+      structured: []
+    };
   }
 
   const { filename } = logOutputIndicatorMatch.groups;
