@@ -243,7 +243,7 @@ async function getCompassLog(logs) {
     debug('no log output indicator found!');
     return {
       raw: null,
-      structured: []
+      structured: [],
     };
   }
 
