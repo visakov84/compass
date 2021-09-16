@@ -9,7 +9,8 @@ function cleanLog(log) {
       '$1'
     )
   );
-  for (const entry of log) {
+  for (let i = 0; i < log.length; i++) {
+    const entry = log[i];
     expect(entry.t.$date).to.be.a('string');
     delete entry.t; // Timestamps vary between each execution
 
@@ -29,6 +30,13 @@ function cleanLog(log) {
     if (entry.id === 1001000022 || entry.id === 1001000023) {
       expect(entry.attr.duration).to.be.a('number');
       entry.attr.duration = 100;
+    }
+    // Remove most mongosh entries as they are quite noisy
+    if (
+      entry.c.startsWith('MONGOSH') &&
+      (entry.id !== 1000000007 || entry.attr.input.includes('typeof prompt'))
+    ) {
+      log.splice(i--, 1);
     }
   }
   return log;
@@ -173,6 +181,16 @@ describe('Logging integration', function () {
         attr: {
           isMongos: false,
           isWritable: true,
+        },
+      },
+      {
+        s: 'I',
+        c: 'MONGOSH',
+        id: 1000000007,
+        ctx: 'repl',
+        msg: 'Evaluating input',
+        attr: {
+          input: 'JSON.stringify(db.runCommand({ connectionStatus: 1 }))',
         },
       },
       {
